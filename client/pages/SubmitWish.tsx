@@ -8,7 +8,7 @@ import { loadStripe } from "@stripe/stripe-js";
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
 
 // URL do backend
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3001";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "https://my-backend-2scz.onrender.com";
 
 export default function SubmitWish() {
   const [wish, setWish] = useState("");
