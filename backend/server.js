@@ -7,9 +7,23 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Configuração CORS completa
+// ===== Configuração CORS =====
+const allowedOrigins = [
+  'http://localhost:8080',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://gilded-squirrel-086a27.netlify.app' // Netlify frontend
+];
+
 app.use(cors({
-  origin: ['http://localhost:8080', 'http://localhost:5173', 'http://localhost:3000'],
+  origin: function(origin, callback){
+    if(!origin) return callback(null, true); // permitir Postman ou requisições diretas
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = `CORS policy does not allow access from this origin: ${origin}`;
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Origin']
@@ -20,7 +34,7 @@ app.options('*', cors());
 
 app.use(express.json());
 
-// ========== ROTAS ==========
+// ===== ROTAS =====
 
 // Health check
 app.get('/health', (req, res) => {
@@ -30,11 +44,11 @@ app.get('/health', (req, res) => {
     stripeConfigured: !!process.env.STRIPE_SECRET_KEY,
     frontendUrl: process.env.FRONTEND_URL,
     timestamp: new Date().toISOString(),
-    allowedOrigins: ['http://localhost:8080', 'http://localhost:5173']
+    allowedOrigins
   });
 });
 
-// Rota de teste CORS (que está faltando!)
+// Rota de teste CORS
 app.post('/test-create-session', (req, res) => {
   console.log('✅ CORS test endpoint called from:', req.headers.origin);
   res.json({
@@ -95,7 +109,7 @@ app.post('/create-checkout-session', async (req, res) => {
       success: true,
       sessionId: session.id,
       url: session.url,
-      dreamId: dreamId
+      dreamId
     });
 
   } catch (error) {
@@ -118,7 +132,7 @@ app.get('/test', (req, res) => {
   });
 });
 
-// Iniciar servidor
+// ===== Iniciar servidor =====
 app.listen(PORT, () => {
   console.log('\n' + '='.repeat(50));
   console.log('🚀 DREAMS BACKEND STARTED');
